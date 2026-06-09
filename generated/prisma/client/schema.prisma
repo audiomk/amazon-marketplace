@@ -1,0 +1,50 @@
+// 1. Updated for Prisma 7 requirements
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma/client" // Required for Prisma 7
+}
+
+// 2. The User Model
+model User {
+  id            String  @id @default(cuid())
+  email         String  @unique
+  password      String
+  role          String  @default("BUYER")
+  vendorProfile Vendor?
+}
+
+// 3. The Vendor Model
+model Vendor {
+  id        String    @id @default(cuid())
+  storeName String    @unique
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id])
+  products  Product[]
+}
+
+// 4. The Product Model
+model Product {
+  id           String   @id @default(uuid())
+  name         String
+  description  String? // Keep this!
+  price        Float
+  image        String
+  countInStock Int
+  vendorId     String
+  vendor       Vendor   @relation(fields: [vendorId], references: [id])
+  reviews      Review[] // Add this
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int
+  comment   String
+  productId String
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+}
